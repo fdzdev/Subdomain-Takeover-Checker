@@ -117,7 +117,12 @@ def load_urls_from_file(file_path):
 
 
 def log_results(results, unique_cnames, log_file="results.log"):
-    with open(log_file, "w") as f:
+    with open(log_file, "a") as f:  # Open the file in append mode ('a')
+        # Write a separator or header for each log session
+        f.write("\n" + "=" * 40 + "\n")
+        f.write("New Log Entry\n")
+        f.write("=" * 40 + "\n")
+
         # Write unique CNAMEs at the top
         f.write("Unique CNAMEs and their associated URLs:\n")
         f.write("=" * 40 + "\n")
@@ -133,6 +138,8 @@ def log_results(results, unique_cnames, log_file="results.log"):
                 f.write(f"[!] Error: {result['url']} - {result['error']}\n")
             else:
                 f.write(f"[-] No takeover detected: {result['url']}\n")
+
+    print(f"Results successfully appended to {log_file}")
 
 
 def main():
