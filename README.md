@@ -49,10 +49,11 @@ The output will display the CNAME records found for each subdomain and indicate 
 ## Example Keywords for Vulnerable Services
 
 The script uses a keywords.txt file to load CNAME patterns associated with vulnerable services. Make sure the file includes keywords like:
-   "s3.amazonaws.com"
-   "github.io"
-   "unbounce.com"
-
+   ```bash
+   s3.amazonaws.com
+   github.io
+   unbounce.com
+   ```
 ## Logging 
 
 Every time you scan using the -d flag it will be added to results.log. 
@@ -60,7 +61,7 @@ Every time you scan using the -l flag it will create a new file text with the re
    ```bash
    [!] Vulnerable: example.com (CNAME: s3.amazonaws.com)
    [-] No takeover detected: anotherdomain.com
-
+   ```
 
 ### Contributions
 
