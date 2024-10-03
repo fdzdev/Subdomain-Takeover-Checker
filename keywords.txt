@@ -40,3 +40,5 @@ na-west1.surge.sh
 surveysparrow.com	
 read.uberflip.com	
 ngrok.io
+netlify.com
+leadpages.net
