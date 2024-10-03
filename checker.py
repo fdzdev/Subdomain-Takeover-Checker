@@ -7,13 +7,26 @@ import argparse
 from urllib.parse import urlparse
 import time
 import os
+import sys
 
 colorama.init()
 
 
 def load_keywords_from_file(file_path):
-    with open(file_path, "r") as file:
-        return [line.strip() for line in file if line.strip()]
+    try:
+        with open(file_path, "r") as f:
+            domains = [
+                line.strip()
+                for line in f
+                if not line.strip().startswith("*") and line.strip()
+            ]
+        return domains
+    except Exception as e:
+        print(f"Error reading file: {e}")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("Stopped by user")
+        sys.exit(1)
 
 
 # Known vulnerable services
@@ -60,7 +73,9 @@ def check_subdomain_takeover(url):
     except Exception as e:
         result["error"] = str(e)
         print(f"{Fore.RED}[!] Error resolving DNS for {domain}: {e}{Style.RESET_ALL}")
-
+    except KeyboardInterrupt:
+        print("Stopped by user")
+        return None  # Return None so that it can be handled in analyze_urls
     return result
 
 
@@ -76,6 +91,9 @@ def test_for_takeover(url):
         print(f"{Fore.MAGENTA}[-] No takeover detected on: {url}{Style.RESET_ALL}")
     except requests.exceptions.RequestException as e:
         print(f"{Fore.RED}[!] Error accessing {url}: {e}{Style.RESET_ALL}")
+    except KeyboardInterrupt:
+        print("Stopped by user")
+        return None
     return False
 
 
@@ -95,30 +113,42 @@ def analyze_urls(urls):
             url = future_to_url[future]
             try:
                 result = future.result()
-                results.append(result)
+                if result:
+                    results.append(result)
 
-                # Collect unique CNAMEs with their associated URLs
-                if result["cname"]:
-                    unique_cnames[result["cname"]] = result["url"]
+                    # Collect unique CNAMEs with their associated URLs
+                    if result["cname"]:
+                        unique_cnames[result["cname"]] = result["url"]
 
                 print(
                     f"Progress: {Fore.CYAN}{i}/{total_urls}{Style.RESET_ALL} URLs checked."
                 )
-            except Exception as e:
-                print(f"{Fore.RED}[!] Error processing {url}: {e}{Style.RESET_ALL}")
+            except KeyboardInterrupt:
+                print(f"{Fore.RED}[!] Process interrupted by user{Style.RESET_ALL}")
+                break  # Stop the processing if user interrupts
 
     return results, unique_cnames
 
 
 def load_urls_from_file(file_path):
-    with open(file_path, "r") as file:
-        urls = [line.strip() for line in file if line.strip()]
-    return urls
+    try:
+        with open(file_path, "r") as f:
+            domains = [
+                line.strip()
+                for line in f
+                if not line.strip().startswith("*") and line.strip()
+            ]
+        return domains
+    except Exception as e:
+        print(f"Error reading file: {e}")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("Stopped by user")
+        sys.exit(1)
 
 
 def log_results(results, unique_cnames, log_file="results.log"):
     with open(log_file, "a") as f:  # Open the file in append mode ('a')
-        # Write a separator or header for each log session
         f.write("\n" + "=" * 40 + "\n")
         f.write("New Log Entry\n")
         f.write("=" * 40 + "\n")
@@ -140,6 +170,13 @@ def log_results(results, unique_cnames, log_file="results.log"):
                 f.write(f"[-] No takeover detected: {result['url']}\n")
 
     print(f"Results successfully appended to {log_file}")
+
+
+def log_cnames_to_txt(unique_cnames, log_file="cname_txt.log"):
+    with open(log_file, "w") as f:
+        for cname in unique_cnames:
+            f.write(f"{cname}\n")
+    print(f"Unique CNAMEs successfully logged to {log_file}")
 
 
 def main():
@@ -164,14 +201,23 @@ def main():
         return
 
     log_file_name = (
-        f"report_{os.path.basename(args.list)}" if args.list else "results.log"
+        f"LIVEREPORT_{os.path.basename(args.list)}" if args.list else "results.log"
+    )
+    log_cname_name = (
+        f"CNAME_{os.path.basename(args.list)}" if args.list else "cname_txt.log"
     )
 
     results, unique_cnames = analyze_urls(urls)
 
     log_results(results, unique_cnames, log_file=log_file_name)
-    print(f"\nResults logged to {log_file_name}")
+    log_cnames_to_txt(unique_cnames, log_file=log_cname_name)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(
+            f"{Fore.RED}\n[!] Program interrupted by user. Exiting...{Style.RESET_ALL}"
+        )
+        sys.exit(0)
