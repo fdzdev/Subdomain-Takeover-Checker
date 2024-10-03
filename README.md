@@ -48,7 +48,7 @@ The output will display the CNAME records found for each subdomain and indicate 
 
 ## Example Keywords for Vulnerable Services
 
-The script uses a keywords.txt file to load CNAME patterns associated with vulnerable services. Make sure the file includes keywords like, feel free to add additional vulnerable domains:
+The script uses a keywords.txt file to load CNAME patterns associated with vulnerable services. Make sure the file includes keywords like, feel free to add additional vulnerable domains. We currently have 42 fingerprints:
    ```bash
    s3.amazonaws.com
    github.io
