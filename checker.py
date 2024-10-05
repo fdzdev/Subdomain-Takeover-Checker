@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 import time
 import os
 import sys
+from finder import process_urls  # from finder.py file function process_urls
 
 colorama.init()
 
@@ -75,7 +76,7 @@ def check_subdomain_takeover(url):
         print(f"{Fore.RED}[!] Error resolving DNS for {domain}: {e}{Style.RESET_ALL}")
     except KeyboardInterrupt:
         print("Stopped by user")
-        return None  # Return None so that it can be handled in analyze_urls
+        return None  # Return None so that it can be handled in analyze_urls!!
     return result
 
 
@@ -125,7 +126,7 @@ def analyze_urls(urls):
                 )
             except KeyboardInterrupt:
                 print(f"{Fore.RED}[!] Process interrupted by user{Style.RESET_ALL}")
-                break  # Stop the processing if user interrupts
+                break
 
     return results, unique_cnames
 
@@ -148,12 +149,17 @@ def load_urls_from_file(file_path):
 
 
 def log_results(results, unique_cnames, log_file="results.log"):
-    with open(log_file, "a") as f:  # Open the file in append mode ('a')
+    # Ensure the Full Reports directory exists
+    os.makedirs("Full Reports", exist_ok=True)
+
+    log_file_path = os.path.join("Full Reports", log_file)
+
+    with open(log_file_path, "a") as f:  # Open the file in append mode ('a')
         f.write("\n" + "=" * 40 + "\n")
         f.write("New Log Entry\n")
         f.write("=" * 40 + "\n")
 
-        # Write unique CNAMEs at the top
+        #  unique CNAMEs at the top
         f.write("Unique CNAMEs and their associated URLs:\n")
         f.write("=" * 40 + "\n")
         for cname, url in unique_cnames.items():
@@ -169,14 +175,19 @@ def log_results(results, unique_cnames, log_file="results.log"):
             else:
                 f.write(f"[-] No takeover detected: {result['url']}\n")
 
-    print(f"Results successfully appended to {log_file}")
+    print(f"Results successfully appended to {log_file_path}")
 
 
 def log_cnames_to_txt(unique_cnames, log_file="cname_txt.log"):
-    with open(log_file, "w") as f:
+    # Ensure the CNAME Reports directory exists
+    os.makedirs("CNAME Reports", exist_ok=True)
+
+    log_file_path = os.path.join("CNAME Reports", log_file)
+
+    with open(log_file_path, "w") as f:
         for cname in unique_cnames:
             f.write(f"{cname}\n")
-    print(f"Unique CNAMEs successfully logged to {log_file}")
+    print(f"Unique CNAMEs successfully logged to {log_file_path}")
 
 
 def main():
@@ -200,6 +211,10 @@ def main():
         print(f"{Fore.RED}No URLs provided for scanning.{Style.RESET_ALL}")
         return
 
+    # Create directories if they do not exist
+    os.makedirs("Full Reports", exist_ok=True)
+    os.makedirs("cname reports", exist_ok=True)
+
     log_file_name = (
         f"LIVEREPORT_{os.path.basename(args.list)}" if args.list else "results.log"
     )
@@ -207,10 +222,27 @@ def main():
         f"CNAME_{os.path.basename(args.list)}" if args.list else "cname_txt.log"
     )
 
+    # Analyze URLs for subdomain takeover
     results, unique_cnames = analyze_urls(urls)
 
     log_results(results, unique_cnames, log_file=log_file_name)
     log_cnames_to_txt(unique_cnames, log_file=log_cname_name)
+
+    # Prepare to check NXDOMAIN for the unique CNAMEs
+    nxdomain_file_name = (
+        f"cname reports/NXD_{os.path.basename(args.list)}"
+        if args.list
+        else "cname reports/NXD_results.log"
+    )
+    nxdomain_urls = process_urls(unique_cnames.values(), nxdomain_file_name)
+
+    # Print NXDOMAIN results to the bottom of the screen
+    if nxdomain_urls:
+        print(f"\n{Fore.RED}NXDOMAIN URLs found:")
+        for url in nxdomain_urls:
+            print(url)
+    else:
+        print(Fore.GREEN + "\nNo NXDOMAIN URLs found.")
 
 
 if __name__ == "__main__":
