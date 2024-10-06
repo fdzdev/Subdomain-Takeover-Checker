@@ -5,7 +5,6 @@ from colorama import Fore, Style
 import concurrent.futures
 import argparse
 from urllib.parse import urlparse
-import time
 import os
 import sys
 from finder import process_urls  # from finder.py file function process_urls
