@@ -212,7 +212,7 @@ def main():
 
     # Create directories if they do not exist
     os.makedirs("Full Reports", exist_ok=True)
-    os.makedirs("cname reports", exist_ok=True)
+    os.makedirs("CNAME Reports", exist_ok=True)
 
     log_file_name = (
         f"LIVEREPORT_{os.path.basename(args.list)}" if args.list else "results.log"
@@ -229,9 +229,9 @@ def main():
 
     # Prepare to check NXDOMAIN for the unique CNAMEs
     nxdomain_file_name = (
-        f"cname reports/NXD_{os.path.basename(args.list)}"
+        f"CNAME Reports/NXD_{os.path.basename(args.list)}"
         if args.list
-        else "cname reports/NXD_results.log"
+        else "CNAME Reports/NXD_results.log"
     )
     nxdomain_urls = process_urls(unique_cnames.values(), nxdomain_file_name)
 
