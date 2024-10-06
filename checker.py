@@ -208,6 +208,7 @@ def main():
 
     if not urls:
         print(f"{Fore.RED}No URLs provided for scanning.{Style.RESET_ALL}")
+        print("Remember to use the arguments -l domain.txt or -d nasa.gov")
         return
 
     # Create directories if they do not exist
