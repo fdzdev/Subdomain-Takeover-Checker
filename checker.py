@@ -7,7 +7,7 @@ import argparse
 from urllib.parse import urlparse
 import os
 import sys
-from finder import process_urls  # from finder.py file function process_urls
+from finder import process_urls  # from finder.py file function process_urls!
 
 colorama.init()
 
