@@ -29,7 +29,7 @@ def load_keywords_from_file(file_path):
         sys.exit(1)
 
 
-# Known vulnerable services
+# Known vulnerable services! Check .txt
 VULNERABLE_CNAME_KEYWORDS = load_keywords_from_file("keywords.txt")
 
 # Error messages that signal a subdomain takeover possibility
