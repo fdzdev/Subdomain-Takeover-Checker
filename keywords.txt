@@ -19,6 +19,7 @@ hatenablog.com
 helpjuice.com
 helpscoutdocs.com
 helprace.com
+brandpad.io
 cloudapp.net
 cloudapp.azure.com
 azurewebsites.net
